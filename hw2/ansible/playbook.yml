@@ -1,0 +1,56 @@
+---
+- hosts: all
+  tasks:
+  - name: Install nginx
+    apk:
+      name: nginx
+      state: present
+      update_cache: yes
+
+  - name: Copy ndinx config
+    template:
+      src: ./nginx/nginx.conf
+      dest: /etc/nginx/nginx.conf
+
+  - name: Run nginx
+    service:
+      name: nginx
+      state: started
+      enabled: yes
+
+  - name: Install java 21
+    apk:
+      name: openjdk21
+      state: present
+      update_cache: yes
+
+  - name: Install maven
+    apk:
+      name: maven
+      state: present
+      update_cache: yes
+
+
+  - name: Create app diretory
+    file:
+      path: /app
+      state: directory
+
+  - name: Copy app files
+    copy:
+      src: ./app/
+      dest: /app
+
+  - name: change permission app
+    command: chmod 777 /app
+
+  - name: change permission mvnw
+    command: chmod 777 /app/mvnw
+
+  - name: Install dependecies
+    command: ./mvnw clean package
+    args:
+      chdir: /app
+
+  - name: Run app
+    command: java -jar /app/target/Cat.jar

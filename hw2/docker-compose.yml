@@ -1,0 +1,26 @@
+services:
+  spring_app:
+    build: ./spring_app
+    tty: true
+    networks:
+      - spring-net
+    ports:
+      - 8082:80
+    volumes:
+      - ./spring_volume:/app
+
+
+  ansible:
+    build: .
+    tty: true
+    networks:
+      - spring-net
+    depends_on:
+      - spring_app
+    volumes:
+      - ./ansible:/ansible
+    command: ansible-playbook playbook.yml 
+
+networks:
+  spring-net:
+    driver: bridge
