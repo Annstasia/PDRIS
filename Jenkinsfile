@@ -6,16 +6,6 @@ pipeline {
     }
 
     stages {
-        stage('Check Environment') {
-            steps {
-                sh 'echo "JAVA_HOME=$JAVA_HOME"'
-                sh 'echo "PATH=$PATH"'
-                sh 'java -version || echo "Java not found"'
-                sh 'mvn -version || echo "Maven not found"'
-                sh 'docker version'
-                sh 'docker compose version'
-            }
-        }
         stage('Build') {
             steps {
                 sh 'mvn clean package -DskipTests'
@@ -24,12 +14,10 @@ pipeline {
 
         stage('Test') {
             steps {
-                // Запуск тестов
                 sh 'mvn test -P allure'
             }
             post {
                 always {
-                    // Публикация отчетов о тестах
                     allure includeProperties:
                      false,
                      jdk: '',
@@ -50,6 +38,7 @@ pipeline {
         }
         stage('Deploy') {
             steps {
+                sh 'docker compose stop'
                 sh 'docker compose down'
                 sh 'docker compose up -d'
             }
